@@ -1,63 +1,6 @@
 clear all; close all; clc
 
 %--------- IMPORTING DATA ----------------------------------------%
-
-%DATA FROM TEST WITH SOME MOVEMENT
-dataIMU     = csvread('1605kalmantest_imu1.csv', 1, 0);
-timeIMU     = dataIMU(:,1);
-fieldSupply = dataIMU(:,2);
-fieldXGyro  = dataIMU(:,3);
-fieldYGyro  = dataIMU(:,4);
-fieldZGyro  = dataIMU(:,5);
-fieldXAccl  = dataIMU(:,6);
-fieldYAccl  = dataIMU(:,7);
-fieldZAccl  = dataIMU(:,8);
-fieldXMagn  = dataIMU(:,9);
-fieldYMagn  = dataIMU(:,10);
-fieldZMagn  = dataIMU(:,11);
-fieldTemp   = dataIMU(:,12);
-fieldADC    = dataIMU(:,13);
-
-timeIMU = timeIMU*10e-10;        % time in seconds
-timeIMU = timeIMU - timeIMU(1);  % time starting from zero
-
-%DATA FROM SAME TEST, AFTER KALMANFILER
-dataATT = csvread('1605kalmantest_att1.csv', 1 ,0);
-timeATT      = dataATT(:,1);
-fieldRoll    = dataATT(:,2);
-fieldPitch   = dataATT(:,3);
-fieldYaw     = dataATT(:,4);
-fieldRolld   = dataATT(:,5);
-fieldPitchd  = dataATT(:,6);
-fieldYawd    = dataATT(:,7);
-fieldRolldd  = dataATT(:,8);
-fieldPitchdd = dataATT(:,9);
-fieldYawdd   = dataATT(:,10);
-
-timeATT = timeATT*10e-10;        % time in seconds
-timeATT = timeATT - timeATT(1);  % time starting from zero
-
-
-
-
-%DATA FROM STILL TEST (MINIMAL MOVEMENT)
-dataStill    = csvread('2017-05-04_still_test_att.csv', 1 ,0);
-timeStill    = dataStill(:,1);
-stillRoll    = dataStill(:,2);
-stillPitch   = dataStill(:,3);
-stillYaw     = dataStill(:,4);
-stillRolld   = dataStill(:,5);
-stillPitchd  = dataStill(:,6);
-stillYawd    = dataStill(:,7);
-stillRolldd  = dataStill(:,8);
-stillPitchdd = dataStill(:,9);
-stillYawdd   = dataStill(:,10);
-
-timeStill = timeStill*10e-10;          % time in seconds
-timeStill = timeStill - timeStill(1);  % time starting from zero
-
-
-
 %DATA FROM STILL TEST 2 (MINIMAL MOVEMENT - MORE RECENT)
 dataNew    = csvread('imuYawNoise.csv', 1 ,0);
 timeNew    = dataNew(:,1);
@@ -97,75 +40,7 @@ d = designfilt( 'highpassfir', ...
 %fvtool(d)
 
 %-------------------------------------------------------%
-
-
-%---analyzing noize in first test----%
-
-%t = 0:.05:85.8; %persumed time
-
-%Sanity Check of Time Vector
-%plot(t,fieldYaw)
-%hold on
-%plot(timeATT, fieldYaw)
-
-%using filter on the data from the first test
-%figure;
-%dOut = filter(d, fieldYaw);
-%plot(t,fieldYaw)
-%hold on
-%plot(t,dOut)
-
-%isolating a part of the signal where the noize is consistant:
-%whiteNoize = dOut(700:1200);
-
-%plotting the psd of the signal
-%figure;
-%periodogram(whiteNoize,[],512,20,'power')
-%read -40dB on diagram, calculating power of noize:
-%db2pow(-40)
-
-
-
-%---analyzing noize in second test----%
-
-t2 = 0:.05:960.25; %persumed time
-
-%Sanity Check of Time Vector
-%figure
-%plot(t2,stillYaw)
-%hold on
-%plot(timeStill, stillYaw)
-
-%using filter on the data from the first test
-%figure;
-%dOut = filter(d, stillYaw);
-%plot(t,stillYaw)
-%hold on
-%plot(t,dOut)
-
-%isolating a part of the signal where the noize is consistant:
-%whiteNoize = dOut(700:1200);
-
-%figure
-%plot(t2,stillYawd-mean(stillYawd))
-
-noize = stillYawd(11840:15740);
-noize = noize -mean(noize);
-tnoize = t2(1:size(noize));
-%figure
-%plot(tnoize,noize)
-
-%plotting the psd of the signal
-%figure;
-%periodogram(noize,[],512,20,'power')
-%read -40dB on diagram, calculating power of noize:
-%db2pow(-45)
-
-
-
-
-
-%---analyzing noize in NEW test----%
+%---analyzing noise in NEW test----%
 
 t3 = 0:.05:270.15; %persumed time
 
@@ -192,7 +67,7 @@ meanOfPow = mean(Hreal)
 
 dbMean = mean(pow2db(Hreal))
 
-%read -58dB on diagram, calculating power of noize:
+%read -58dB on diagram, calculating power of noise:
 powOfDbMean = db2pow(dbMean)
 
 %noisePower = powOfDbMean
@@ -223,11 +98,7 @@ peak5fq = 8.96*2*pi;
 
 
 
-
-
-
-
-sim('noizeGen.slx')
+sim('noiseGen.slx')
 
 hold on
 [ Hsim Tsim ] = periodogram(simout.Data,[],10000,20,'power');
@@ -248,7 +119,7 @@ scatter(t3,noise,'.')
 
 t = simout.Time;
 Fs = 20;
-T = 1/Fs;             % Sampling period       
+T = 1/Fs;                  % Sampling period       
 X = simout.Data;
 L = length(X);             % Length of signal
 
@@ -271,7 +142,7 @@ ylabel('|P1(f)|')
 
 t = t3;
 Fs = 20;
-T = 1/Fs;             % Sampling period       
+T = 1/Fs;                  % Sampling period       
 X = noise;
 L = length(X);             % Length of signal
 
